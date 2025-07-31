@@ -27,7 +27,7 @@ public class ApiSecurityConfig {
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> {
-                    exchange.anyExchange().authenticated();
+                    exchange.anyExchange().permitAll();
                 })
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
