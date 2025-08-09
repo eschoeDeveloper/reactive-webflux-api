@@ -88,16 +88,16 @@ public class ApiSecurityConfig {
                 })
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> {
-                    exchange.pathMatchers("/h2-console/**").permitAll()
-                            .pathMatchers(
-                                    "/swagger-ui.html",
-                                    "/swagger-ui/**",
-                                    "/v2/api-docs",
-                                    "/swagger-resources/**",
-                                    "/webjars/**"
+                    exchange.pathMatchers(
+                            "/h2-console/**",
+                            "/swagger-ui.html",
+                            "/swagger-ui/**",
+                            "/v2/api-docs",
+                            "/swagger-resources/**",
+                            "/webjars/**",
+                            "/auth/**",
+                            "/favicon.ico"
                             ).permitAll()
-                            .pathMatchers("/auth/**").permitAll()
-                            .pathMatchers("/favicon.ico").permitAll()
                             .anyExchange().authenticated();
                 })
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
