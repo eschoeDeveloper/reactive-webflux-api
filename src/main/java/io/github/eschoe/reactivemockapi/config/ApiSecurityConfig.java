@@ -1,6 +1,6 @@
 package io.github.eschoe.reactivemockapi.config;
 
-import io.github.eschoe.reactivemockapi.security.JsonRequestConverter;
+import io.github.eschoe.reactivemockapi.security.JwtAuthenticationConverter;
 import io.github.eschoe.reactivemockapi.security.JwtAuthWebFilter;
 import io.github.eschoe.reactivemockapi.security.JwtAuthenticationManager;
 import io.github.eschoe.reactivemockapi.security.JwtUtil;
@@ -11,7 +11,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -19,15 +18,11 @@ import org.springframework.security.core.userdetails.MapReactiveUserDetailsServi
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
-import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -36,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -48,7 +42,7 @@ public class ApiSecurityConfig {
      * */
     @Order(Ordered.HIGHEST_PRECEDENCE)
     @Bean
-    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, JsonRequestConverter loginConverter,
+    SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, JwtAuthenticationConverter loginConverter,
                                                      JwtAuthWebFilter jwtAuthWebFilter, JwtUtil jwtUtil, ReactiveAuthenticationManager authManager) {
 
         AuthenticationWebFilter loginFilter  = new AuthenticationWebFilter(authManager);
@@ -115,16 +109,19 @@ public class ApiSecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
     public ReactiveUserDetailsService reactiveUserDetailsService(PasswordEncoder encoder) {
+
         UserDetails user = User.withUsername("user")
                 .password(encoder.encode("password"))
                 .roles("USER")
                 .build();
+
         return new MapReactiveUserDetailsService(user);
+
     }
 
     @Bean

@@ -11,15 +11,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Component
-public class JsonRequestConverter implements ServerAuthenticationConverter {
+public class JwtAuthenticationConverter implements ServerAuthenticationConverter {
 
     @Override
     public Mono<Authentication> convert(ServerWebExchange exchange) {
