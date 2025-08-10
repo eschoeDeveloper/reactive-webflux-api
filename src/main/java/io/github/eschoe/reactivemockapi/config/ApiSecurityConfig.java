@@ -1,9 +1,6 @@
 package io.github.eschoe.reactivemockapi.config;
 
-import io.github.eschoe.reactivemockapi.security.JwtAuthenticationConverter;
-import io.github.eschoe.reactivemockapi.security.JwtAuthWebFilter;
-import io.github.eschoe.reactivemockapi.security.JwtAuthenticationManager;
-import io.github.eschoe.reactivemockapi.security.JwtUtil;
+import io.github.eschoe.reactivemockapi.security.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
@@ -125,8 +122,8 @@ public class ApiSecurityConfig {
     }
 
     @Bean
-    public ReactiveAuthenticationManager authenticationManager(JwtUtil jwtUtil) {
-        return new JwtAuthenticationManager(jwtUtil);
+    public ReactiveAuthenticationManager authenticationManager(JwtUtil jwtUtil, ApiUserDetailsService userDetailsService, ApiUserRoleService userRoleService, PasswordEncoder encoder) {
+        return new JwtAuthenticationManager(jwtUtil, userDetailsService, userRoleService, encoder);
     }
 
     @Bean
