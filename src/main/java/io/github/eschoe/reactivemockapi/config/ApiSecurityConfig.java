@@ -21,10 +21,13 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import org.springframework.security.web.server.context.ServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -89,16 +92,17 @@ public class ApiSecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchange -> {
                     exchange.pathMatchers(
-                            "/h2-console/**",
-                            "/swagger-ui.html",
-                            "/swagger-ui/**",
-                            "/v2/api-docs",
-                            "/swagger-resources/**",
-                            "/webjars/**",
-                            "/auth/**",
-                            "/favicon.ico"
-                            ).permitAll()
-                            .anyExchange().authenticated();
+                            "/h2-console",
+                        "/h2-console/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v2/api-docs",
+                        "/swagger-resources/**",
+                        "/webjars/**",
+                        "/auth/**",
+                        "/favicon.ico"
+                    ).permitAll()
+                    .anyExchange().authenticated();
                 })
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
