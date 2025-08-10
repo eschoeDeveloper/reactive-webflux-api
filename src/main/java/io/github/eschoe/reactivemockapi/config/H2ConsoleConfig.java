@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import java.sql.SQLException;
 
 @Component
-//@Profile("local")
 public class H2ConsoleConfig {
 
     private Server server;

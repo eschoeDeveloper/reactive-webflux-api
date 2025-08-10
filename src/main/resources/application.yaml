@@ -1,8 +1,20 @@
 spring:
   application:
     name: reactive-mockito-api
+  h2:
+    console:
+      enabled: false
+
+  # JDBC (H2 Console용) — 파일 기반
+  datasource:
+    url: jdbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # R2DBC (애플리케이션용) — 파일 기반
   r2dbc:
-    url: r2dbc:h2:mem:///testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: r2dbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
 
