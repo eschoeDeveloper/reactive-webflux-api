@@ -26,12 +26,14 @@ public class ApiUserDetailsService implements ReactiveUserDetailsService {
     }
 
     @Override
-    public Mono<UserDetails> findByUsername(String username) {
+    public Mono<UserDetails> findByUsername(String userid) {
 
-        return apiUserRepository.findByUsername(username)
+        System.out.println(userid);
+
+        return apiUserRepository.findByUserid(userid)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("사용자를 찾을 수 없습니다.")))
                 .flatMap(u ->
-                    apiUserRoleService.getAhthoritiesByUsername(username)
+                    apiUserRoleService.getAhthoritiesByUsername(userid)
                             .defaultIfEmpty("ROLE_USER")
                             .distinct()
                             .collectList()
@@ -42,11 +44,17 @@ public class ApiUserDetailsService implements ReactiveUserDetailsService {
 
     private UserDetails toUserDetails(ApiUser apiUser, List<String> roles) {
 
+        System.out.println("toUserDetails: " + apiUser);
+
+        System.out.println("userid: " + apiUser.getUserid());
+        System.out.println("username: " + apiUser.getUsername());
+        System.out.println("password: " + apiUser.getPassword());
+
         List<GrantedAuthority> authorities = roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role))
                 .collect(Collectors.toList());
 
-        return User.withUsername(apiUser.getUsername())
+        return User.withUsername(apiUser.getUserid())
                 .password(apiUser.getPassword())
                 .authorities(authorities)
                 .accountExpired(true)

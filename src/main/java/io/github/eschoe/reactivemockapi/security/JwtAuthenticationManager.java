@@ -1,5 +1,6 @@
 package io.github.eschoe.reactivemockapi.security;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
@@ -8,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -35,29 +37,39 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
 
             // 1) 먼저 JWT 시도
             try {
+                
                 String jwtUsername = jwtUtil.validateAndGetUsername(cred); // 서명/만료 검증 + username (유효하지 않으면 null 또는 예외)
+
                 if (jwtUsername != null && !jwtUsername.isBlank()) {
                     List<GrantedAuthority> authorities = extractAuthoritiesFromJwtSafely(jwtUsername);
                     return Mono.just(new UsernamePasswordAuthenticationToken(jwtUsername, null, authorities));
                 }
+                
             } catch (CredentialsExpiredException e) {
-                return Mono.error(e); // 만료는 그대로 실패
+                return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "요청 만료"));
             } catch (Exception ignore) {
-                // 유효하지 않은 토큰이면 아래 password 플로우로 폴백
+                return Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, ignore.getMessage()));
             }
 
             // 2) JWT가 아니면 username/password 검증
             String username = authentication.getName();
             String rawPassword = cred;
 
+            System.out.println("authentication.getName() = " + authentication.getName());
+            System.out.println("rawPassword: " + rawPassword);
+
             return apiUserDetailsService.findByUsername(username)
                     .switchIfEmpty(Mono.error(new BadCredentialsException("잘못된 인증입니다.")))
                     .flatMap(ud -> {
+
+                        System.out.println("ud = " + ud.getPassword());
+                        System.out.println("rawPassword = " + rawPassword);
+
                         if (!passwordEncoder.matches(rawPassword, ud.getPassword())) {
                             return Mono.error(new BadCredentialsException("잘못된 인증입니다."));
                         }
                         return Mono.just(new UsernamePasswordAuthenticationToken(
-                                ud.getUsername(), null, ud.getAuthorities()));
+                                ud, null, ud.getAuthorities()));
                     });
         });
 

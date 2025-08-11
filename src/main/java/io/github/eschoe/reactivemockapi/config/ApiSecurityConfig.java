@@ -42,29 +42,29 @@ public class ApiSecurityConfig {
     SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, JwtAuthenticationConverter loginConverter,
                                                      JwtAuthWebFilter jwtAuthWebFilter, JwtUtil jwtUtil, ReactiveAuthenticationManager authManager) {
 
-        AuthenticationWebFilter loginFilter  = new AuthenticationWebFilter(authManager);
+//        AuthenticationWebFilter loginFilter  = new AuthenticationWebFilter(authManager);
+//
+//        loginFilter.setServerAuthenticationConverter(loginConverter);
+//        loginFilter.setSecurityContextRepository(NoOpServerSecurityContextRepository.getInstance());
 
-        loginFilter.setServerAuthenticationConverter(loginConverter);
-        loginFilter.setSecurityContextRepository(NoOpServerSecurityContextRepository.getInstance());
-
-        // 로그인 성공 시 JWT 발급
-        loginFilter.setAuthenticationSuccessHandler((webFilterExchange, authentication) -> {
-            String username = authentication.getName();
-            String token = jwtUtil.generateToken(username);
-            ServerWebExchange ex = webFilterExchange.getExchange();
-            var res = ex.getResponse();
-            res.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            String body = "{\"token\":\"" + token + "\"}";
-            var buf = res.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
-            return res.writeWith(Mono.just(buf));
-        });
-
-        // 로그인 실패 시 401
-        loginFilter.setAuthenticationFailureHandler((webFilterExchange, ex) -> {
-            var res = webFilterExchange.getExchange().getResponse();
-            res.setStatusCode(HttpStatus.UNAUTHORIZED);
-            return res.setComplete();
-        });
+//        // 로그인 성공 시 JWT 발급
+//        loginFilter.setAuthenticationSuccessHandler((webFilterExchange, authentication) -> {
+//            String username = authentication.getName();
+//            String token = jwtUtil.generateAccessToken(username);
+//            ServerWebExchange ex = webFilterExchange.getExchange();
+//            var res = ex.getResponse();
+//            res.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+//            String body = "{\"token\":\"" + token + "\"}";
+//            var buf = res.bufferFactory().wrap(body.getBytes(StandardCharsets.UTF_8));
+//            return res.writeWith(Mono.just(buf));
+//        });
+//
+//        // 로그인 실패 시 401
+//        loginFilter.setAuthenticationFailureHandler((webFilterExchange, ex) -> {
+//            var res = webFilterExchange.getExchange().getResponse();
+//            res.setStatusCode(HttpStatus.UNAUTHORIZED);
+//            return res.setComplete();
+//        });
 
         return http
                 .cors(cors -> {
@@ -75,12 +75,13 @@ public class ApiSecurityConfig {
                         // 특정 허용 메서드만 명시
                         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
                         // 특정 허용 헤더만 명시
-                        corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+                        corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Refresh-Token"));
                         corsConfiguration.setMaxAge(3600L);
                         return corsConfiguration;
                     });
                 })
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authenticationManager(authManager)
                 .authorizeExchange(exchange -> {
                     exchange.pathMatchers(
                             "/h2-console",
@@ -90,15 +91,16 @@ public class ApiSecurityConfig {
                         "/v2/api-docs",
                         "/swagger-resources/**",
                         "/webjars/**",
-                        "/auth/**",
+                        "/api/auth/**",
                         "/favicon.ico"
                     ).permitAll()
                     .anyExchange().authenticated();
                 })
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                .logout(ServerHttpSecurity.LogoutSpec::disable)
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // 상태 유지 안 함
-                .addFilterAt(loginFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+//                .addFilterAt(loginFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(jwtAuthWebFilter, SecurityWebFiltersOrder.AUTHORIZATION)
                 .build();
 
@@ -110,25 +112,13 @@ public class ApiSecurityConfig {
     }
 
     @Bean
-    public ReactiveUserDetailsService reactiveUserDetailsService(PasswordEncoder encoder) {
-
-        UserDetails user = User.withUsername("user")
-                .password(encoder.encode("password"))
-                .roles("USER")
-                .build();
-
-        return new MapReactiveUserDetailsService(user);
-
-    }
-
-    @Bean
     public ReactiveAuthenticationManager authenticationManager(JwtUtil jwtUtil, ApiUserDetailsService userDetailsService, ApiUserRoleService userRoleService, PasswordEncoder encoder) {
         return new JwtAuthenticationManager(jwtUtil, userDetailsService, userRoleService, encoder);
     }
 
     @Bean
     public JwtUtil jwtUtil(Key jwtSigningKey) {
-        return new JwtUtil(jwtSigningKey, 3600_000); // 1시간
+        return new JwtUtil(jwtSigningKey, 3600_000, 7200_000); // 1시간
     }
 
 }
