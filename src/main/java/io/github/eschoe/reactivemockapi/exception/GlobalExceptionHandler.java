@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -28,9 +31,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<GlobalErrorResponse> handleRse(ResponseStatusException ex, ServerHttpRequest req) {
+    public ResponseEntity<Map<String, Object>> handleRse(ResponseStatusException ex, ServerHttpRequest req) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", java.time.Instant.now().toString());
+        body.put("status", ex.getStatusCode().value());
+        body.put("error", ex.getStatusCode().toString());
+        body.put("message", ex.getReason());
+        body.put("path", req.getPath().value());
         return ResponseEntity.status(ex.getStatusCode())
-                .body(new GlobalErrorResponse("ERROR", ex.getReason(), req.getPath().value()));
+                .body(body);
     }
 
     @ExceptionHandler(Throwable.class)

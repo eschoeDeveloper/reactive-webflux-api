@@ -7,17 +7,25 @@ spring:
 
   # JDBC (H2 Console용) — 파일 기반
   datasource:
-    url: jdbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   # R2DBC (애플리케이션용) — 파일 기반
   r2dbc:
-    url: r2dbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE
+    url: r2dbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE
     username: sa
     password:
+    pool:
+      enabled: true                 # 기본 true
+      initial-size: 0               # 시작 시 미리 만드는 커넥션 수
+      max-size: 20                  # 동시에 빌려줄 최대 커넥션 수
+      max-idle-time: 30m            # 유휴 커넥션 최대 유지 시간
+      max-life-time: 30m            # 커넥션 전체 수명 (DB/네트워크 문제 누적 방지)
+      max-acquire-time: 5s          # 커넥션 빌리기 대기 최대시간 (대기 길어지면 즉시 실패시켜 원인 파악 쉬움)
+      max-create-connection-time: 3s # 새 커넥션 생성 타임아웃
+      validation-query: "SELECT 1"  # 유휴 커넥션 검증 쿼리(REMOTE 검증일 때 사용)
 
 server:
   port: 8090
-

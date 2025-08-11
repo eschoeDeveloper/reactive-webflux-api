@@ -4,12 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
 import org.springframework.stereotype.Component;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -25,12 +27,14 @@ public class JwtAuthenticationConverter implements ServerAuthenticationConverter
         MediaType ct = safeContentType(exchange.getRequest().getHeaders());
 
         // 헤더가 없거나 JSON이 아니면 스킵
-        if (ct == null || !MediaType.APPLICATION_JSON.isCompatibleWith(ct)) {
-            return Mono.empty();
+        if (ct == null || MediaType.APPLICATION_JSON.isCompatibleWith(ct) == false) {
+            return Mono.error(new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "지원하지 않는 미디어 타입입니다."));
         }
 
         return DataBufferUtils.join(exchange.getRequest().getBody())
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청입니다.")))
                 .flatMap(dataBuffer -> {
+
                     try {
                         byte[] bytes = new byte[dataBuffer.readableByteCount()];
                         dataBuffer.read(bytes);
@@ -38,20 +42,20 @@ public class JwtAuthenticationConverter implements ServerAuthenticationConverter
 
                         ObjectMapper objectMapper = new ObjectMapper();
                         Map<String, String> map = objectMapper.readValue(body, new TypeReference<>() {});
-                        String username = map.get("username");
+                        String userid = map.get("userid");
                         String password = map.get("password");
 
-                        if (username == null || password == null) {
-                            return Mono.error(new IllegalArgumentException("username/password 누락"));
+                        if (userid == null || password == null) {
+                            return Mono.error(new IllegalArgumentException("아이디 및 패스워드 누락"));
                         }
 
-                        // 인증 전 토큰
                         Authentication token =
-                                UsernamePasswordAuthenticationToken.unauthenticated(username, password);
+                                UsernamePasswordAuthenticationToken.unauthenticated(userid, password);
 
                         return Mono.just(token);
+
                     } catch (Exception e) {
-                        return Mono.error(e);
+                        return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 요청 본문", e));
                     } finally {
                         DataBufferUtils.release(dataBuffer); // 꼭 release!
                     }
