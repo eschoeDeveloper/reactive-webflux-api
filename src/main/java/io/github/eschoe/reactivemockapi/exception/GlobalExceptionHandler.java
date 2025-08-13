@@ -31,15 +31,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, Object>> handleRse(ResponseStatusException ex, ServerHttpRequest req) {
-        Map<String, Object> body = new LinkedHashMap<>();
-        body.put("timestamp", java.time.Instant.now().toString());
-        body.put("status", ex.getStatusCode().value());
-        body.put("error", ex.getStatusCode().toString());
-        body.put("message", ex.getReason());
-        body.put("path", req.getPath().value());
+    public ResponseEntity<GlobalErrorResponse> handleRse(ResponseStatusException ex, ServerHttpRequest req) {
         return ResponseEntity.status(ex.getStatusCode())
-                .body(body);
+                .body(new GlobalErrorResponse(ex.getStatusCode().toString(), ex.getReason(), req.getPath().value()));
     }
 
     @ExceptionHandler(Throwable.class)

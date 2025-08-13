@@ -84,11 +84,15 @@ public class ApiSecurityConfig {
                 .authenticationManager(authManager)
                 .authorizeExchange(exchange -> {
                     exchange.pathMatchers(
-                            "/h2-console",
-                        "/h2-console/**",
-                        "/swagger-ui.html",
+                        "/h2-console",
+                        "/api/v3/api-docs/**",
+                        "/api/swagger-ui/**",
+                        "/api/swagger-ui.html",
+                        "/api/swagger-resources/**",
+                        "/api/webjars/**",
+                        "/v3/api-docs/**",
                         "/swagger-ui/**",
-                        "/v2/api-docs",
+                        "/swagger-ui.html",
                         "/swagger-resources/**",
                         "/webjars/**",
                         "/api/auth/**",
@@ -99,6 +103,9 @@ public class ApiSecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
+                .exceptionHandling(e -> e.authenticationEntryPoint((swe, ex) ->
+                        Mono.fromRunnable(() -> swe.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED))
+                ))
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // 상태 유지 안 함
 //                .addFilterAt(loginFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(jwtAuthWebFilter, SecurityWebFiltersOrder.AUTHORIZATION)

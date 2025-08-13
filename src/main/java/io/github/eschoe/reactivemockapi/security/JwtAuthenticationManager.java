@@ -55,16 +55,9 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
             String username = authentication.getName();
             String rawPassword = cred;
 
-            System.out.println("authentication.getName() = " + authentication.getName());
-            System.out.println("rawPassword: " + rawPassword);
-
             return apiUserDetailsService.findByUsername(username)
                     .switchIfEmpty(Mono.error(new BadCredentialsException("잘못된 인증입니다.")))
                     .flatMap(ud -> {
-
-                        System.out.println("ud = " + ud.getPassword());
-                        System.out.println("rawPassword = " + rawPassword);
-
                         if (!passwordEncoder.matches(rawPassword, ud.getPassword())) {
                             return Mono.error(new BadCredentialsException("잘못된 인증입니다."));
                         }
@@ -77,9 +70,17 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
 
     private List<GrantedAuthority> extractAuthoritiesFromJwtSafely(String username) {
         try {
-            List<String> roles = apiUserRoleService.getAhthoritiesByUsername(username).collectList().block(); // 예: ["ROLE_USER","ROLE_ADMIN"]; 없으면 예외/null일 수 있음
-            if (roles == null || roles.isEmpty()) roles = List.of("ROLE_USER");
-            return roles.stream().distinct().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+
+            return apiUserRoleService.getAhthoritiesByUsername(username)
+                    .toStream()
+                    .distinct()
+                    .map(role -> {
+                        if(role == null || role.isEmpty()) { role = "ROLE_USER"; }
+                        return new SimpleGrantedAuthority(role);
+                    })
+                    .collect(Collectors.toList());
+
+
         } catch (Exception e) {
             return List.of(new SimpleGrantedAuthority("ROLE_USER"));
         }
