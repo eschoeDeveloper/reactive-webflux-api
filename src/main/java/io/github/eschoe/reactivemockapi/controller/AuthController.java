@@ -30,6 +30,20 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
+    @PostMapping(value = "/token/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(method = "POST", description = "API 토큰 재발급입니다.", summary = "토큰 재발급 API")
+    public Mono<ResponseEntity<ApiLoginResponse>> tokenRefresh(ServerWebExchange exchange) {
+
+        HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
+
+        String accessToken = httpHeaders.get("Authorization").toString();
+
+        jwtUtil.isExpiredToken(accessToken);
+
+        return Mono.just(ResponseEntity.ok(new ApiLoginResponse("OK")));
+
+    }
+
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(method = "POST", description = "API 테스트를 위한 로그인 입니다.", summary = "로그인 API")
     public Mono<ResponseEntity<ApiLoginResponse>> login(@RequestBody ApiLoginRequest req) {
