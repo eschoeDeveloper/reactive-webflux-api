@@ -1,5 +1,6 @@
 package io.github.eschoe.reactivemockapi.security;
 
+import io.github.eschoe.reactivemockapi.service.user.ApiUserRoleService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.CredentialsExpiredException;
