@@ -2,6 +2,7 @@ spring:
   application:
     name: reactive-mockito-api
   h2:
+    port: 8091
     console:
       enabled: false
 

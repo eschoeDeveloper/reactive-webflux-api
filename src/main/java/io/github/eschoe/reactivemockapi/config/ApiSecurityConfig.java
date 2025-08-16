@@ -21,10 +21,27 @@ import reactor.core.publisher.Mono;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebFluxSecurity
 public class ApiSecurityConfig {
+
+    private final List<String> allowMethods = Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
+    private final List<String> allowHeaders = Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Refresh-Token");
+    private final String[] whitePathList = new String[]{"/h2-console",
+            "/api/v3/api-docs/**",
+            "/api/swagger-ui/**",
+            "/api/swagger-ui.html",
+            "/api/swagger-resources/**",
+            "/api/webjars/**",
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/swagger-resources/**",
+            "/webjars/**",
+            "/api/auth/**",
+            "/favicon.ico"};
 
     /**
      * Spring Security 기본 설정
@@ -66,9 +83,9 @@ public class ApiSecurityConfig {
                         corsConfiguration.setAllowCredentials(true);
                         corsConfiguration.setAllowedOrigins(Collections.singletonList("http://localhost:8090"));
                         // 특정 허용 메서드만 명시
-                        corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+                        corsConfiguration.setAllowedMethods(allowMethods);
                         // 특정 허용 헤더만 명시
-                        corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "X-Refresh-Token"));
+                        corsConfiguration.setAllowedHeaders(allowHeaders);
                         corsConfiguration.setMaxAge(3600L);
                         return corsConfiguration;
                     });
@@ -76,21 +93,7 @@ public class ApiSecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authenticationManager(authManager)
                 .authorizeExchange(exchange -> {
-                    exchange.pathMatchers(
-                        "/h2-console",
-                        "/api/v3/api-docs/**",
-                        "/api/swagger-ui/**",
-                        "/api/swagger-ui.html",
-                        "/api/swagger-resources/**",
-                        "/api/webjars/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html",
-                        "/swagger-resources/**",
-                        "/webjars/**",
-                        "/api/auth/**",
-                        "/favicon.ico"
-                    ).permitAll()
+                    exchange.pathMatchers(whitePathList).permitAll()
                     .anyExchange().authenticated();
                 })
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
