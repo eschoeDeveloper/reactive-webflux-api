@@ -1,4 +1,4 @@
-package io.github.eschoe.reactivemockapi.security;
+package io.github.eschoe.reactivemockapi.service.user;
 
 import reactor.core.publisher.Flux;
 
