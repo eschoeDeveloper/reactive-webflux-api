@@ -1,1 +1,1 @@
-rootProject.name = "reactive-mock-api"
+rootProject.name = "reactive-webflux-api"

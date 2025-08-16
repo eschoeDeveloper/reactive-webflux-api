@@ -1,10 +1,10 @@
 package io.github.eschoe.reactivemockapi.dto.auth.response;
 
-public class LoginResponse {
+public class ApiLoginResponse {
 
     private String message;
 
-    public LoginResponse(String message) {
+    public ApiLoginResponse(String message) {
         this.message = message;
     }
 

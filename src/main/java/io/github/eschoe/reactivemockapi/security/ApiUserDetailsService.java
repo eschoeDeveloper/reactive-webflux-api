@@ -29,13 +29,13 @@ public class ApiUserDetailsService implements ReactiveUserDetailsService {
     @Override
     public Mono<UserDetails> findByUsername(String userid) {
 
-        System.out.println(userid);
+        String userRole = apiUserRoleService.getAhthoritiesByUsername(userid).blockFirst();
 
         return apiUserRepository.findByUserid(userid)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("사용자를 찾을 수 없습니다.")))
                 .flatMap(u ->
                     apiUserRoleService.getAhthoritiesByUsername(userid)
-                            .defaultIfEmpty("ROLE_USER")
+                            .defaultIfEmpty(userRole)
                             .distinct()
                             .collectList()
                             .map(roles -> toUserDetails(u, roles))
@@ -44,12 +44,6 @@ public class ApiUserDetailsService implements ReactiveUserDetailsService {
     }
 
     private UserDetails toUserDetails(ApiUser apiUser, List<String> roles) {
-
-        System.out.println("toUserDetails: " + apiUser);
-
-        System.out.println("userid: " + apiUser.getUserid());
-        System.out.println("username: " + apiUser.getUsername());
-        System.out.println("password: " + apiUser.getPassword());
 
         List<GrantedAuthority> authorities = roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role))

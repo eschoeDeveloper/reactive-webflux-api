@@ -1,20 +1,21 @@
 spring:
   application:
-    name: reactive-mockito-api
+    name: reactive-webflux-api
   h2:
+    port: 8091
     console:
       enabled: false
 
   # JDBC (H2 Console용) — 파일 기반
   datasource:
-    url: jdbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE
+    url: jdbc:h2:file:///./data/reactive_webflux_db;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
 
   # R2DBC (애플리케이션용) — 파일 기반
   r2dbc:
-    url: r2dbc:h2:file:///./data/reactive_api_db;AUTO_SERVER=TRUE
+    url: r2dbc:h2:file:///./data/reactive_webflux_db;AUTO_SERVER=TRUE
     username: sa
     password:
     pool:
