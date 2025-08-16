@@ -1,30 +1,23 @@
 package io.github.eschoe.reactivemockapi.config;
 
 import io.github.eschoe.reactivemockapi.security.*;
+import io.github.eschoe.reactivemockapi.service.user.ApiUserRoleService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collections;
@@ -84,11 +77,15 @@ public class ApiSecurityConfig {
                 .authenticationManager(authManager)
                 .authorizeExchange(exchange -> {
                     exchange.pathMatchers(
-                            "/h2-console",
-                        "/h2-console/**",
-                        "/swagger-ui.html",
+                        "/h2-console",
+                        "/api/v3/api-docs/**",
+                        "/api/swagger-ui/**",
+                        "/api/swagger-ui.html",
+                        "/api/swagger-resources/**",
+                        "/api/webjars/**",
+                        "/v3/api-docs/**",
                         "/swagger-ui/**",
-                        "/v2/api-docs",
+                        "/swagger-ui.html",
                         "/swagger-resources/**",
                         "/webjars/**",
                         "/api/auth/**",
@@ -99,6 +96,9 @@ public class ApiSecurityConfig {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .logout(ServerHttpSecurity.LogoutSpec::disable)
+                .exceptionHandling(e -> e.authenticationEntryPoint((swe, ex) ->
+                        Mono.fromRunnable(() -> swe.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED))
+                ))
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // 상태 유지 안 함
 //                .addFilterAt(loginFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .addFilterAt(jwtAuthWebFilter, SecurityWebFiltersOrder.AUTHORIZATION)

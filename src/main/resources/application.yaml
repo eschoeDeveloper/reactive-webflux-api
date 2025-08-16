@@ -29,3 +29,12 @@ spring:
 
 server:
   port: 8090
+
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha
+  cache:
+    disabled: true

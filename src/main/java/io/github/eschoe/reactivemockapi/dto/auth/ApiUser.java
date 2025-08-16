@@ -1,4 +1,4 @@
-package io.github.eschoe.reactivemockapi.dto;
+package io.github.eschoe.reactivemockapi.dto.auth;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.PersistenceCreator;

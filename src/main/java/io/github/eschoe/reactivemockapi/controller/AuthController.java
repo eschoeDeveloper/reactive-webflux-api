@@ -1,19 +1,15 @@
 package io.github.eschoe.reactivemockapi.controller;
 
-import io.github.eschoe.reactivemockapi.dto.ApiUser;
-import io.github.eschoe.reactivemockapi.dto.ApiUserPrincipal;
 import io.github.eschoe.reactivemockapi.dto.auth.request.ApiLoginRequest;
 import io.github.eschoe.reactivemockapi.dto.auth.response.LoginResponse;
-import io.github.eschoe.reactivemockapi.repository.ApiUserRepository;
-import io.github.eschoe.reactivemockapi.security.JwtAuthenticationManager;
 import io.github.eschoe.reactivemockapi.security.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "인증 API", description = "로그인/로그아웃")
 public class AuthController {
 
     private final ReactiveAuthenticationManager authenticationManager;
@@ -34,9 +31,8 @@ public class AuthController {
     }
 
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<LoginResponse>> login(
-            @RequestBody ApiLoginRequest req
-            ) {
+    @Operation(method = "POST", description = "API 테스트를 위한 로그인 입니다.", summary = "로그인 API")
+    public Mono<ResponseEntity<LoginResponse>> login(@RequestBody ApiLoginRequest req) {
 
         if(StringUtils.isBlank(req.getUserid()) || StringUtils.isBlank(req.getPassword())) {
             return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 사용자명/패스워드 입니다."));
@@ -61,11 +57,12 @@ public class AuthController {
                 .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new LoginResponse("UNAUTHORIZED"))))
                 .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponse("UNAUTHORIZED"))));
+                        .body(new LoginResponse(e.getMessage()))));
 
     }
 
     @PostMapping("/logout")
+    @Operation(method = "POST", description = "로그인 해제를 위한 로그아웃 입니다.", summary = "로그아웃 API")
     public Mono<ResponseEntity<Void>> logout(ServerWebExchange exchange) {
 
         /***

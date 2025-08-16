@@ -1,4 +1,4 @@
-package io.github.eschoe.reactivemockapi.security;
+package io.github.eschoe.reactivemockapi.service.user;
 
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
