@@ -1,7 +1,7 @@
 package io.github.eschoe.reactivemockapi.controller;
 
 import io.github.eschoe.reactivemockapi.dto.auth.request.ApiLoginRequest;
-import io.github.eschoe.reactivemockapi.dto.auth.response.LoginResponse;
+import io.github.eschoe.reactivemockapi.dto.auth.response.ApiLoginResponse;
 import io.github.eschoe.reactivemockapi.security.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,7 +32,7 @@ public class AuthController {
 
     @PostMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(method = "POST", description = "API 테스트를 위한 로그인 입니다.", summary = "로그인 API")
-    public Mono<ResponseEntity<LoginResponse>> login(@RequestBody ApiLoginRequest req) {
+    public Mono<ResponseEntity<ApiLoginResponse>> login(@RequestBody ApiLoginRequest req) {
 
         if(StringUtils.isBlank(req.getUserid()) || StringUtils.isBlank(req.getPassword())) {
             return Mono.error(new ResponseStatusException(HttpStatus.BAD_REQUEST, "잘못된 사용자명/패스워드 입니다."));
@@ -52,12 +52,12 @@ public class AuthController {
                     return ResponseEntity.ok()
                             .header(HttpHeaders.AUTHORIZATION, "Bearer " + access)
                             .header("X-Refresh-Token", refresh)
-                            .body(new LoginResponse("OK"));
+                            .body(new ApiLoginResponse("OK"));
                 })
                 .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponse("UNAUTHORIZED"))))
+                        .body(new ApiLoginResponse("UNAUTHORIZED"))))
                 .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponse(e.getMessage()))));
+                        .body(new ApiLoginResponse(e.getMessage()))));
 
     }
 
