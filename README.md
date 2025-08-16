@@ -3,7 +3,7 @@
 ---
 ## 📖 프로젝트 개요
 
-**reactive-mock-api** 는 spring 기반의 reactive api ( WebFlux )를 이해하기 위한 예제 프로젝트로서 h2 데이터베이스 기반 실 데이터를 활용하여 Service 로직에 대한 행위 테스트를 진행합니다.
+**reactive-webflux-api** 는 spring 기반의 reactive api ( WebFlux )를 이해하기 위한 예제 프로젝트로서 h2 데이터베이스 기반 실 데이터를 활용하여 Service 로직에 대한 행위 테스트를 진행합니다.
 
 ---
 
