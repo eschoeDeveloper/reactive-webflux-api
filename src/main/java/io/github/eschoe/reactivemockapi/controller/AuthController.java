@@ -1,21 +1,15 @@
 package io.github.eschoe.reactivemockapi.controller;
 
-import io.github.eschoe.reactivemockapi.dto.ApiUser;
-import io.github.eschoe.reactivemockapi.dto.ApiUserPrincipal;
 import io.github.eschoe.reactivemockapi.dto.auth.request.ApiLoginRequest;
 import io.github.eschoe.reactivemockapi.dto.auth.response.LoginResponse;
-import io.github.eschoe.reactivemockapi.repository.ApiUserRepository;
-import io.github.eschoe.reactivemockapi.security.JwtAuthenticationManager;
 import io.github.eschoe.reactivemockapi.security.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;

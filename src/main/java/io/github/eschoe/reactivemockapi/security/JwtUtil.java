@@ -1,8 +1,6 @@
 package io.github.eschoe.reactivemockapi.security;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 
 import java.security.Key;
 import java.time.Instant;
@@ -56,6 +54,23 @@ public class JwtUtil {
         } catch (JwtException e) {
             return null;
         }
+    }
+
+    public boolean isExpiredToken(String token) {
+
+        try {
+
+            Jws<Claims> jws = Jwts.parserBuilder().setSigningKey(key)
+                    .build().parseClaimsJws(token);
+
+            Date expiration = jws.getBody().getExpiration();
+
+            return new Date().after(expiration);
+
+        } catch(ExpiredJwtException e) {
+            return true;
+        }
+
     }
 
 }

@@ -61,8 +61,7 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
                         if (!passwordEncoder.matches(rawPassword, ud.getPassword())) {
                             return Mono.error(new BadCredentialsException("잘못된 인증입니다."));
                         }
-                        return Mono.just(new UsernamePasswordAuthenticationToken(
-                                ud, null, ud.getAuthorities()));
+                        return Mono.just(new UsernamePasswordAuthenticationToken(ud, null, ud.getAuthorities()));
                     });
         });
 

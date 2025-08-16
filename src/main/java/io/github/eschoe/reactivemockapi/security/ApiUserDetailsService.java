@@ -1,6 +1,6 @@
 package io.github.eschoe.reactivemockapi.security;
 
-import io.github.eschoe.reactivemockapi.dto.ApiUser;
+import io.github.eschoe.reactivemockapi.dto.auth.ApiUser;
 import io.github.eschoe.reactivemockapi.repository.ApiUserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
