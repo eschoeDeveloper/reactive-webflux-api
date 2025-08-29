@@ -9,7 +9,7 @@ version = "0.0.1-SNAPSHOT"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(23)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -27,6 +27,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    implementation("io.projectreactor.tools:blockhound:1.0.6.RELEASE")
     implementation("io.r2dbc:r2dbc-h2")
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.9")
     implementation("com.h2database:h2")
@@ -40,4 +41,8 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.run.BootRun>("bootRun") {
+    jvmArgs = listOf("-XX:+AllowRedefinitionToAddDeleteMethods")
 }
